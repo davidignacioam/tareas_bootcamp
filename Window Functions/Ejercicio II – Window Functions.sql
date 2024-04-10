@@ -158,3 +158,53 @@ select
 from products as p 
 order by p.unit_price desc
 ;
+
+/* 15. LAG */
+select 
+	od.order_id as ID_Orden,
+	od.product_id as ID_Producto,
+	od.quantity as Cantidad,
+	lag(od.quantity) over (partition by od.order_id order by od.order_id asc) as Cantidad_Anterior
+from order_details as od 
+;
+
+/* 16. LAG */
+select 
+	o.order_id as ID_Orden,
+	o.order_date  as Fecha_Orden,
+	o.customer_id as ID_Cliente,
+	lag(o.order_date) over (partition by o.customer_id order by o.customer_id, o.order_date asc) as Fecha_Anterior
+from orders as o
+;
+
+
+/* 17. LAG */
+select 
+	p.product_id as ID_Producto,
+	p.product_name as Producto,
+	p.unit_price as Precio,
+	lag(p.unit_price) over (order by p.product_id asc) as Precio_Anterior,
+	p.unit_price - lag(p.unit_price) over (order by p.product_id asc) as Diferencia_Precio_Anterior
+from products as p 
+;
+
+/* 18. LEAD */
+select 
+	p.product_id as ID_Producto,
+	p.product_name as Producto,
+	p.unit_price as Precio,
+	lead (p.unit_price) over (order by p.product_id asc) as Precio_Siguiente
+from products as p 
+;
+
+/* 19. LEAD */
+select 
+	c.category_name as Categoría,
+	sum(od.unit_price * od.quantity) as Suma_Total_Ventas_Categoría,
+	lead (sum(od.unit_price * od.quantity)) over (order by c.category_name asc) as Suma_Total_Ventas_Categoría_Siguiente
+from orders as o
+inner join order_details as od on od.order_id  = o.order_id 
+left join products as p on p.product_id = od.product_id 
+inner join categories as c on c.category_id = p.category_id 
+group by c.category_name
+;
